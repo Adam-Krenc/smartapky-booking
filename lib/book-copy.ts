@@ -6,6 +6,11 @@ export const BOOK_COPY: Record<
     title: string;
     subtitle: string;
     pickSlot: string;
+    pickDay: string;
+    pickTime: string;
+    emptyMonth: string;
+    monthPrev: string;
+    monthNext: string;
     noSlots: string;
     loadError: string;
     next: string;
@@ -30,7 +35,12 @@ export const BOOK_COPY: Record<
   cs: {
     title: "Rezervace konzultace",
     subtitle: "Vyberte volný termín (60 minut, online Google Meet).",
-    pickSlot: "Dostupné termíny",
+    pickSlot: "Termín",
+    pickDay: "Kalendář",
+    pickTime: "Čas",
+    emptyMonth: "V tomto měsíci nemáme volné termíny.",
+    monthPrev: "Předchozí měsíc",
+    monthNext: "Další měsíc",
     noSlots: "Momentálně nejsou k dispozici žádné termíny. Zkuste to prosím později nebo napište na obchod@smartapky.cz.",
     loadError: "Nepodařilo se načíst termíny. Zkuste obnovit stránku.",
     next: "Pokračovat",
@@ -54,7 +64,12 @@ export const BOOK_COPY: Record<
   en: {
     title: "Book a consultation",
     subtitle: "Pick a free slot (60 minutes, Google Meet online).",
-    pickSlot: "Available slots",
+    pickSlot: "Appointment",
+    pickDay: "Calendar",
+    pickTime: "Time",
+    emptyMonth: "No free slots in this month.",
+    monthPrev: "Previous month",
+    monthNext: "Next month",
     noSlots: "No slots are available right now. Please try again later or email obchod@smartapky.cz.",
     loadError: "Could not load slots. Try refreshing the page.",
     next: "Continue",

@@ -9,8 +9,10 @@ export default function BookPage() {
   const gdprPdfUrl = process.env.NEXT_PUBLIC_GDPR_PDF_URL ?? "https://www.smartapky.cz/assets/legal/GDPR.pdf";
 
   return (
-    <main className="flex flex-1 flex-col px-4 py-12">
-      <BookingForm gdprPdfUrl={gdprPdfUrl} />
+    <main className="flex w-full flex-1 flex-col">
+      <div className="mx-auto w-full max-w-[1200px] px-8 py-14 lg:py-20">
+        <BookingForm gdprPdfUrl={gdprPdfUrl} />
+      </div>
     </main>
   );
 }
