@@ -1,36 +1,61 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# smartapky-booking
 
-## Getting Started
+Next.js (App Router) app pro **rezervaci konzultací**: dostupné sloty z Google Calendar, rezervace s Google Meet, rate limiting přes **Upstash Redis**.
 
-First, run the development server:
+Marketingový web v repu [smartapky-modern-web](https://github.com/Adam-Krenc/smartapky-modern-web) na booking jen **odkazuje** (např. `https://…vercel.app/book` nebo později `https://book.smartapky.cz/book`).
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Požadavky
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- Node.js 20+ (pro `node --env-file=…`)
+- Google Cloud projekt s **Google Calendar API** a OAuth klientem typu **Web application**
+- Upstash Redis (REST URL + token)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Lokální vývoj
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Zkopíruj `.env.example` → `.env.local` a doplň hodnoty (bez commitování).
 
-## Learn More
+2. **Refresh token** (jednorázově na svém počítači):
 
-To learn more about Next.js, take a look at the following resources:
+   - V Google Cloud Console u OAuth klienta přidej redirect URI  
+     `http://127.0.0.1:3456/oauth/callback`  
+     (nebo vlastní port přes `OAUTH_LOCAL_PORT`).
+   - Spusť:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+     ```bash
+     npm run get-token
+     ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+   - Výsledný `GOOGLE_REFRESH_TOKEN` vlož do `.env.local` a na Vercelu do Environment Variables.
 
-## Deploy on Vercel
+3. Dev server:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+   ```bash
+   npm run dev
+   ```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+   Úvodní stránka přesměruje na `/book`.
+
+## API
+
+| Metoda | Cesta | Popis |
+|--------|--------|--------|
+| `GET` | `/api/slots` | Volné sloty v JSON (`slots: string[]` ISO časy). |
+| `POST` | `/api/book` | Tělo: `name`, `email`, `notes?`, `slotStart` (ISO), `gdprAccepted: true`. |
+
+## Env proměnné
+
+Viz `.env.example`. Povinné: `GOOGLE_*`, `UPSTASH_REDIS_*`. Volitelné: `WORK_HOURS`, `OFFICE_EMAIL`, limity rezervací, `NEXT_PUBLIC_GDPR_PDF_URL`.
+
+`WORK_HOURS` je JSON mapy **ISO weekday 1–7** → `[otevřeno, zavřeno]` v hodinách, např. `{"1":[9,17],...,"5":[9,17]}`. Bez nastavení platí Po–Pá 9–17 v `TIMEZONE` (default `Europe/Prague`).
+
+## Deploy (Vercel)
+
+1. Importuj tento repozitář do Vercelu.
+2. Nastav stejné env proměnné jako lokálně (`GOOGLE_REFRESH_TOKEN` jen ve Vercelu).
+3. Po prvním deployi přidej produkční URL do OAuth redirectů, např.  
+   `https://<projekt>.vercel.app/api/...` — **pozn:** samotné rezervace refresh token nepotřebují měnit redirect; redirect je potřeba hlavně pro lokální skript `get-token`. Pro produkční OAuth rozšíření později doplníš `https://book.smartapky.cz/...` pokud přidáš přihlášení uživatelů apod.
+4. Doména `book.smartapky.cz`: DNS CNAME na Vercel + nastavení domény v projektu.
+
+## Fáze 7 (volitelně)
+
+- Transakční e-mail (Resend) po úspěšné rezervaci.
