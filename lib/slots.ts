@@ -32,9 +32,7 @@ export function buildAvailableSlots(
     const isoDow = day.weekday; // Luxon: 1 = Monday … 7 = Sunday
     const range = work[isoDow];
     if (range) {
-      const [openH, closeH] = range;
-      const openMin = openH * 60;
-      const closeMin = closeH * 60;
+      const { openMin, closeMin } = range;
       for (let m = openMin; m + slotMin <= closeMin; m += slotMin) {
         const h = Math.floor(m / 60);
         const min = m % 60;

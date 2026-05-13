@@ -16,7 +16,7 @@ const envSchema = z.object({
   SLOT_MINUTES: z.coerce.number().int().positive().default(60),
   MIN_BOOKING_LEAD_HOURS: z.coerce.number().int().nonnegative().default(24),
   MAX_BOOKING_DAYS: z.coerce.number().int().positive().default(30),
-  /** JSON: ISO weekday 1=Mon … 7=Sun → [startHour, endHour] e.g. {"1":[9,17],"2":[9,17]} */
+  /** JSON: weekday 1=Mon … 7 → legacy [openH,closeH], or {"from":"15:30","to":"23:00"}, or [h,m,h,m] */
   WORK_HOURS: z.string().optional(),
   BOOK_RATE_LIMIT_MAX: z.coerce.number().int().positive().default(5),
   BOOK_RATE_LIMIT_WINDOW_SEC: z.coerce.number().int().positive().default(60),
@@ -24,6 +24,19 @@ const envSchema = z.object({
     .string()
     .url()
     .default("https://www.smartapky.cz/assets/legal/GDPR.pdf"),
+  RESEND_API_KEY: z
+    .string()
+    .optional()
+    .transform((s) => (s && s.trim() !== "" ? s.trim() : undefined)),
+  BOOKING_FROM_EMAIL: z
+    .string()
+    .optional()
+    .transform((s) => (s && s.trim() !== "" ? s.trim() : "obchod@smartapky.cz"))
+    .pipe(z.string().email()),
+  BOOKING_FROM_NAME: z
+    .string()
+    .optional()
+    .transform((s) => (s && s.trim() !== "" ? s.trim() : "Smartapky")),
 });
 
 export type AppEnv = z.infer<typeof envSchema>;

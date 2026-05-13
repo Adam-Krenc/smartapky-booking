@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { sendBookingConfirmationEmail } from "@/lib/booking-confirmation-email";
 import { getEnv } from "@/lib/env";
 import { fetchFreeBusy, getCalendarClient } from "@/lib/google-calendar";
 import { bookingWindow, buildAvailableSlots } from "@/lib/slots";
@@ -111,11 +112,30 @@ export async function POST(req: Request) {
       res.data.conferenceData?.entryPoints?.find((e) => e.entryPointType === "video")?.uri ??
       res.data.hangoutLink ??
       null;
+    const calendarHtmlLink = res.data.htmlLink ?? null;
+
+    if (env.RESEND_API_KEY) {
+      try {
+        await sendBookingConfirmationEmail({
+          resendApiKey: env.RESEND_API_KEY,
+          fromEmail: env.BOOKING_FROM_EMAIL,
+          fromName: env.BOOKING_FROM_NAME,
+          to: email,
+          recipientName: name,
+          slotStart: start,
+          timezone: env.TIMEZONE,
+          meetLink: meetUri,
+          calendarHtmlLink,
+        });
+      } catch (err) {
+        console.error("[book.confirmation_email]", err);
+      }
+    }
 
     return NextResponse.json({
       ok: true,
       eventId: res.data.id ?? null,
-      htmlLink: res.data.htmlLink ?? null,
+      htmlLink: calendarHtmlLink,
       meetLink: meetUri,
     });
   } catch (e) {
